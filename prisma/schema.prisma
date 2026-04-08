@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── 顧客 ─────────────────────────────────────────────────────────────────────
+model Customer {
+  id            String        @id @default(cuid())
+  lineUserId    String?       @unique   // LINE 用戶 ID（LIFF 登入後取得）
+  name          String
+  phone         String?
+  birthday      String?                 // YYYY-MM-DD
+  gender        String?       @default("unset") // female | male | unset
+  storedValue   Int           @default(0)       // 儲值金餘額 (NTD)
+  notes         String?                         // VIP 等級、特殊膚質...
+  isNewCustomer Boolean       @default(true)    // 是否為新客
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  bookings      Booking[]
+  transactions  Transaction[]
+}
+
+// ─── 服務項目 ──────────────────────────────────────────────────────────────────
+model Service {
+  id              String           @id @default(cuid())
+  name            String
+  price           Int                              // NTD
+  category        String                           // female | male | product
+  duration        Int              @default(60)   // 預估服務時間（分鐘）
+  isActive        Boolean          @default(true)
+  sortOrder       Int              @default(0)
+  createdAt       DateTime         @default(now())
+
+  bookingServices BookingService[]
+}
+
+// ─── 預約 ─────────────────────────────────────────────────────────────────────
+model Booking {
+  id              String           @id @default(cuid())
+  customerId      String
+  customer        Customer         @relation(fields: [customerId], references: [id])
+  date            String                           // YYYY-MM-DD
+  time            String                           // HH:MM
+  status          String           @default("confirmed") // confirmed | completed | cancelled
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  bookingServices BookingService[]
+  transaction     Transaction?
+}
+
+// ─── 預約服務（多對多中間表）──────────────────────────────────────────────────
+model BookingService {
+  id        String  @id @default(cuid())
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+  price     Int     // 當下成交價（可能有折扣）
+}
+
+// ─── 結帳紀錄 ─────────────────────────────────────────────────────────────────
+model Transaction {
+  id             String    @id @default(cuid())
+  bookingId      String?   @unique
+  booking        Booking?  @relation(fields: [bookingId], references: [id])
+  customerId     String
+  customer       Customer  @relation(fields: [customerId], references: [id])
+  originalAmount Int                         // 原價合計
+  discountType   String?                     // newCustomer | storedValue | manual
+  discountAmount Int       @default(0)       // 折抵金額
+  finalAmount    Int                         // 應付金額
+  paymentMethod  String                      // cash | transfer
+  paidAt         DateTime  @default(now())
+  note           String?
+}
+
+// ─── 封鎖時段 ─────────────────────────────────────────────────────────────────
+// 管理員手動封鎖，避免顧客預約（公休、外出等）
+model LockedSlot {
+  id     String  @id @default(cuid())
+  date   String  // YYYY-MM-DD
+  time   String  // HH:MM
+  reason String?
+
+  @@unique([date, time])
+}
+
+// ─── 成本記帳 ─────────────────────────────────────────────────────────────────
+model CostRecord {
+  id          String   @id @default(cuid())
+  category    String                      // supplies | rent | utilities | marketing
+  description String?
+  amount      Int                         // NTD
+  date        String                      // YYYY-MM-DD
+  createdAt   DateTime @default(now())
+}
+
+// ─── 庫存管理 ─────────────────────────────────────────────────────────────────
+model InventoryItem {
+  id             String   @id @default(cuid())
+  name           String
+  quantity       Float
+  unit           String   // 個、ml、g、捲...
+  alertThreshold Float    @default(0) // 低於此數量顯示警示
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
