@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #5C4D42;
+  --color-primary-hover: #4A3D34;
+  --color-available: #52B788;
+  --color-available-light: #E8F5EE;
+  --color-bg: #F2F0EC;
+  --color-surface: #FFFFFF;
+  --color-muted: #9CA3AF;
+  --color-gold: #D4A853;
+  --color-gold-light: #FDF6E3;
+  --color-danger: #DC2626;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: #1A1A1A;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Microsoft JhengHei',
+    'Noto Sans TC', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── 共用卡片 ─────────────────────────────────────────────────── */
+.card {
+  @apply bg-white rounded-2xl shadow-sm;
+}
+
+/* ─── 主色按鈕 ─────────────────────────────────────────────────── */
+.btn-primary {
+  @apply bg-primary text-white font-medium rounded-xl px-5 py-3
+         hover:bg-primary-hover active:scale-95 transition-all duration-150
+         disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* ─── 次要按鈕（外框） ─────────────────────────────────────────── */
+.btn-outline {
+  @apply border border-gray-200 text-gray-600 font-medium rounded-xl px-5 py-3
+         hover:bg-gray-50 active:scale-95 transition-all duration-150;
+}
+
+/* ─── 輸入框 ────────────────────────────────────────────────────── */
+.input {
+  @apply w-full bg-subtle border-0 rounded-xl px-4 py-3 text-sm
+         placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/30;
+}
+
+/* ─── 分區標題（如：成本記帳本 · COST TRACKER） ───────────────── */
+.section-label {
+  @apply text-xs font-semibold tracking-widest text-muted uppercase mb-3;
+}
+
+/* ─── 時段格 ───────────────────────────────────────────────────── */
+.slot-available {
+  @apply border-2 border-available text-available rounded-2xl p-3 text-center cursor-pointer
+         hover:bg-available-light transition-colors;
+}
+.slot-locked {
+  @apply border-2 border-muted bg-gray-50 text-muted rounded-2xl p-3 text-center cursor-pointer
+         hover:bg-gray-100 transition-colors;
+}
+.slot-booked {
+  @apply border-2 border-primary bg-primary/5 text-primary rounded-2xl p-3 text-center
+         cursor-default;
+}
+
+/* ─── 滾動條美化 ───────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* ─── Modal 遮罩動畫 ───────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.modal-overlay {
+  animation: fadeIn 0.15s ease-out;
+}
+.modal-content {
+  animation: slideUp 0.2s ease-out;
+}
+
+/* ─── 優惠標籤 ──────────────────────────────────────────────────── */
+.discount-badge {
+  @apply bg-gold-light border border-gold/30 rounded-xl px-4 py-3 flex items-center gap-3;
+}
